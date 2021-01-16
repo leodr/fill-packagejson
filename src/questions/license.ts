@@ -1,4 +1,5 @@
 import { prompt } from "enquirer";
+import { JsonObject } from "type-fest";
 
 const licenses = [
     { id: "MIT", name: "MIT License (recommended)" },
@@ -8,7 +9,17 @@ const licenses = [
     { id: "BSD-3-Clause", name: 'BSD 3-Clause "New" or "Revised" License' },
 ];
 
-export async function getLicense() {
+export async function getLicense(
+    packageJson: JsonObject
+): Promise<string | object> {
+    if (
+        (typeof packageJson.license === "string" ||
+            typeof packageJson.license === "object") &&
+        packageJson.license !== null
+    ) {
+        return packageJson.license;
+    }
+
     const { licenseName }: { licenseName: string } = await prompt({
         type: "select",
         name: "licenseName",
@@ -19,7 +30,7 @@ export async function getLicense() {
         })),
     });
 
-    const license = licenses.find((l) => l.name === licenseName)?.id;
+    const license = licenses.find((l) => l.name === licenseName)?.id!;
 
     return license;
 }

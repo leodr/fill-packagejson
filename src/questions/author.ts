@@ -1,4 +1,5 @@
 import { prompt } from "enquirer";
+import { JsonObject } from "type-fest";
 
 interface AuthorData {
     name: string;
@@ -9,7 +10,18 @@ interface GetAuthorOptions {
     username: string;
 }
 
-export async function getAuthor({ username }: GetAuthorOptions) {
+export async function getAuthor(
+    packageJson: JsonObject,
+    { username }: GetAuthorOptions
+): Promise<string | object> {
+    if (
+        (typeof packageJson.author === "string" ||
+            typeof packageJson.author === "object") &&
+        packageJson.author !== null
+    ) {
+        return packageJson.author;
+    }
+
     // @ts-expect-error
     const { authorData }: { authorData: AuthorData } = await prompt({
         type: "form",

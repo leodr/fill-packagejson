@@ -1,8 +1,10 @@
 import chalk from "chalk";
+import equal from "fast-deep-equal";
 import * as fs from "fs";
+import ora from "ora";
 import * as path from "path";
 import sortPackageJson from "sort-package-json";
-import type { JsonValue, PackageJson } from "type-fest";
+import type { JsonObject } from "type-fest";
 import { promisify } from "util";
 import { getAuthor } from "./questions/author";
 import { getDescription } from "./questions/description";
@@ -13,45 +15,69 @@ import { getRepositoryInfo } from "./questions/repositoryInfo";
 import { getVersion } from "./questions/version";
 
 const readFileAsync = promisify(fs.readFile);
+const writeFileAsync = promisify(fs.writeFile);
 
 async function start() {
-    const pkgJsonLocation = path.resolve("package.json");
+    const pkgJsonLocation = path.resolve("package-gen.json");
 
-    let pkgJsonString: string;
+    let packageJson: JsonObject;
 
-    try {
-        pkgJsonString = await readFileAsync(pkgJsonLocation, {
-            encoding: "utf-8",
-        });
-    } catch {
-        throw Error(
-            "Could not read `package.json` file. Are you in the right directory?"
+    if (fs.existsSync(pkgJsonLocation)) {
+        let pkgJsonString: string;
+
+        try {
+            pkgJsonString = await readFileAsync(pkgJsonLocation, {
+                encoding: "utf-8",
+            });
+        } catch {
+            throw Error("Failed to read your `package.json` file.");
+        }
+
+        try {
+            const json = JSON.parse(pkgJsonString);
+
+            if (typeof json !== "object") {
+                throw Error("`package.json` does not contain a JSON object.");
+            }
+
+            packageJson = json;
+            console.log(
+                chalk.blueBright(
+                    "Loaded your package.json file. You will now be asked to fill in missing fields."
+                )
+            );
+        } catch {
+            throw Error("`package.json` does not contain a valid JSON object.");
+        }
+    } else {
+        packageJson = {};
+
+        chalk.blueBright(
+            "No package.json found in this directory, we will now create one based on your answers."
         );
     }
 
-    let packageJson: JsonValue;
+    const name = await getName(packageJson);
 
-    try {
-        packageJson = JSON.parse(pkgJsonString);
-    } catch {}
+    const version = await getVersion(packageJson);
 
-    const name = await getName();
+    const description = await getDescription(packageJson);
 
-    const version = await getVersion();
+    const keywords = await getKeywords(packageJson);
 
-    const description = await getDescription();
+    const {
+        bugs,
+        homepage,
+        repository,
+        username,
+    } = await getRepositoryInfo(packageJson, { name });
 
-    const keywords = await getKeywords();
+    const license = await getLicense(packageJson);
 
-    const { bugs, homepage, repository, username } = await getRepositoryInfo({
-        name,
-    });
+    const author = await getAuthor(packageJson, { username });
 
-    const license = await getLicense();
-
-    const author = await getAuthor({ username });
-
-    const pkg: PackageJson = {
+    const pkg: JsonObject = {
+        ...packageJson,
         name,
         version,
         description,
@@ -63,14 +89,22 @@ async function start() {
         author,
     };
 
-    const sortedPkg = sortPackageJson(pkg);
+    if (equal(packageJson, pkg)) {
+        ora().succeed("Your `package.json` file is already complete!");
+    } else {
+        const sortedPkg = sortPackageJson(pkg);
 
-    fs.writeFileSync(
-        path.resolve("package-gen.json"),
-        JSON.stringify(sortedPkg, null, 2)
-    );
+        const spinner = ora("Saving `package.json`...").start();
 
-    // Hint if no main or bin
+        await writeFileAsync(
+            path.resolve("package-gen.json"),
+            JSON.stringify(sortedPkg, null, 4)
+        );
+
+        spinner.succeed("Saved your completed `package.json` file!");
+    }
+
+    // TODO: Hint if no main or bin
 }
 
 start().catch((e: Error) => {
