@@ -1,6 +1,6 @@
 {
   "name": "fill-packagejson",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A CLI tool to fill in missing fields in package.json files. Drop-in replacement for `npm init -y`.",
   "keywords": [
     "CLI",
