@@ -1,17 +1,13 @@
 import { prompt } from "enquirer";
-import { JsonObject } from "type-fest";
+import { JsonObject, JsonValue } from "type-fest";
 import { isWebUri } from "valid-url";
 
-interface Repository extends JsonObject {
-  type: string;
-  url: string;
-}
+type Repository = JsonValue | string;
 
 interface RepositoryInfo {
-  repository: Repository;
-  homepage: string;
-  bugs: string | object;
-  username: string;
+  repository?: Repository;
+  homepage?: string;
+  bugs?: string | object;
 }
 
 interface GetRepositoryInfoOptions {
@@ -29,18 +25,17 @@ export async function getRepositoryInfo(
     initial: `project-owner/${name}`,
     format: (value) => value.toLowerCase().replace(/[a-z0-9.\-_/]/, ""),
     validate(value) {
+      if (value === "") return true;
+
       if (/^[a-z0-9\-._]*\/[a-z0-9\-._]*$/.test(value)) return true;
 
       return "This should follow the format `project-owner/project-name`.";
     },
   });
 
-  const repository = {
-    type: "git",
-    url: `https://github.com/${repo}.git`,
-  };
+  const repository = repo ? `github:${repo}` : undefined;
 
-  let homepage: string;
+  let homepage: string | undefined;
 
   if (typeof packageJson.homepage === "string") {
     homepage = packageJson.homepage;
@@ -49,17 +44,19 @@ export async function getRepositoryInfo(
       type: "input",
       name: "homepageUrl",
       message: "Does this project have a dedicated website?",
-      initial: `https://github.com/${repo}#readme`,
+      initial: repo ? `https://github.com/${repo}#readme` : "",
       validate(value) {
         if (isWebUri(value)) return true;
         return "This is not a valid URL.";
       },
     });
 
-    homepage = homepageUrl;
+    if (homepageUrl !== `https://github.com/${repo}#readme`) {
+      homepage = homepageUrl;
+    }
   }
 
-  let bugs: string | object;
+  let bugs: string | object | undefined;
 
   if (
     (typeof packageJson.bugs === "string" ||
@@ -67,14 +64,11 @@ export async function getRepositoryInfo(
     packageJson.bugs !== null
   ) {
     bugs = packageJson.bugs;
-  } else {
-    bugs = `https://github.com/${repo}/issues`;
   }
 
   return {
     repository: repository ?? packageJson.repository,
     homepage,
     bugs,
-    username: repo.split("/")[0] ?? "",
   };
 }

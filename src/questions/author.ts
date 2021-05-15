@@ -7,13 +7,8 @@ interface AuthorData {
   website: string;
 }
 
-interface GetAuthorOptions {
-  username: string;
-}
-
 export async function getAuthor(
-  packageJson: JsonObject,
-  { username }: GetAuthorOptions
+  packageJson: JsonObject
 ): Promise<string | object> {
   if (
     (typeof packageJson.author === "string" ||

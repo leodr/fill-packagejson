@@ -65,14 +65,13 @@ async function start() {
 
   const keywords = await getKeywords(packageJson);
 
-  const { bugs, homepage, repository, username } = await getRepositoryInfo(
-    packageJson,
-    { name }
-  );
+  const { bugs, homepage, repository } = await getRepositoryInfo(packageJson, {
+    name,
+  });
 
   const license = await getLicense(packageJson);
 
-  const author = await getAuthor(packageJson, { username });
+  const author = await getAuthor(packageJson);
 
   const pkg: JsonObject = {
     ...packageJson,
