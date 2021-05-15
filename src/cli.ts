@@ -8,6 +8,7 @@ import sortPackageJson from "sort-package-json";
 import type { JsonObject } from "type-fest";
 import { promisify } from "util";
 import { getLicenseText } from "./license-text";
+import { licenses } from "./licenses";
 import { getAuthor } from "./questions/author";
 import { getDescription } from "./questions/description";
 import { getKeywords } from "./questions/keywords";
@@ -109,6 +110,9 @@ async function start() {
   if (
     !hasLicenseFile &&
     typeof license === "string" &&
+    licenses
+      .map((license) => license.id.toLowerCase())
+      .includes(license.toLowerCase()) &&
     typeof author === "string"
   ) {
     const { wantsLicense }: { wantsLicense: boolean } = await prompt({
