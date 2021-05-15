@@ -20,7 +20,7 @@ const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 
 async function start() {
-  const pkgJsonLocation = path.resolve("package-gen.json");
+  const pkgJsonLocation = path.join(process.cwd(), "package.json");
 
   let packageJson: JsonObject;
 
