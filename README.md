@@ -66,6 +66,8 @@ You should fill in a `main` or `bin` field yourself.
 The `contributors` field is not automatically filled in, you may want to do that
 yourself though.
 
+<br>
+
 ## ❯ Development
 
 First install the dependencies with `npm install`. Then you can run
