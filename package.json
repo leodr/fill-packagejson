@@ -1,6 +1,13 @@
 {
   "name": "fill-packagejson",
   "version": "1.0.0",
+  "description": "A CLI tool to fill in missing fields in package.json files. Drop-in replacement for `npm init -y`.",
+  "keywords": [
+    "CLI",
+    "package",
+    "package-development"
+  ],
+  "repository": "github:leodr/fill-packagejson",
   "license": "MIT",
   "author": "Leo Driesch",
   "main": "index.js",
