@@ -96,7 +96,10 @@ async function start() {
 
     const spinner = ora("Saving `package.json`...").start();
 
-    await writeFileAsync(pkgJsonLocation, JSON.stringify(sortedPkg, null, 2));
+    await writeFileAsync(
+      pkgJsonLocation,
+      `${JSON.stringify(sortedPkg, null, 2)}\n`
+    );
 
     spinner.succeed("Saved your completed `package.json` file!");
   }
