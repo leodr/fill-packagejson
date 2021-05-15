@@ -3,6 +3,7 @@ import { JsonObject } from "type-fest";
 
 interface AuthorData {
   name: string;
+  email: string;
   website: string;
 }
 
@@ -30,12 +31,25 @@ export async function getAuthor(
     choices: [
       { name: "name", message: "Name", initial: "John Doe" },
       {
+        name: "email",
+        message: "Public email",
+      },
+      {
         name: "website",
         message: "Website",
-        initial: `https://github.com/${username}/`,
       },
     ],
   });
 
-  return `${authorData.name} (${authorData.website})`;
+  let authorString = authorData.name;
+
+  if (authorData.email) {
+    authorString += ` <${authorData.email}>`;
+  }
+
+  if (authorData.website) {
+    authorString += ` (${authorData.website})`;
+  }
+
+  return authorString;
 }
