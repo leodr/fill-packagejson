@@ -94,15 +94,18 @@ async function start() {
 
     const spinner = ora("Saving `package.json`...").start();
 
-    await writeFileAsync(
-      path.resolve("package-gen.json"),
-      JSON.stringify(sortedPkg, null, 4)
-    );
+    await writeFileAsync(pkgJsonLocation, JSON.stringify(sortedPkg, null, 4));
 
     spinner.succeed("Saved your completed `package.json` file!");
   }
 
-  // TODO: Hint if no main or bin
+  if (!("main" in pkg) && !("bin" in pkg)) {
+    console.log(
+      chalk.blueBright(
+        "\nDon't forget to add a `main` or `bin` entry to your `package.json` to make it usable for consumers."
+      )
+    );
+  }
 }
 
 start().catch((e: Error) => {
