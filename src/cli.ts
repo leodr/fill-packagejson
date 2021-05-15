@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import chalk from "chalk";
 import { prompt } from "enquirer";
 import equal from "fast-deep-equal";
