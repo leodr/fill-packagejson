@@ -27,9 +27,9 @@ export async function getRepositoryInfo(
     name: "repo",
     message: "Is this project associated with a GitHub repository?",
     initial: `project-owner/${name}`,
-    format: (value) => value.toLowerCase().replace(/[a-z0-9\.\-\_\/]/, ""),
+    format: (value) => value.toLowerCase().replace(/[a-z0-9.\-_/]/, ""),
     validate(value) {
-      if (/^[a-z0-9\-\._]*\/[a-z0-9\-\._]*$/.test(value)) return true;
+      if (/^[a-z0-9\-._]*\/[a-z0-9\-._]*$/.test(value)) return true;
 
       return "This should follow the format `project-owner/project-name`.";
     },
