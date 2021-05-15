@@ -5,8 +5,8 @@
   "author": "Leo Driesch",
   "main": "index.js",
   "scripts": {
-    "dev": "ncc run src/cli.ts",
-    "build": "ncc build src/cli.ts --minify -o dist/",
+    "dev": "npm run build && node lib/cli.js",
+    "build": "node scripts/build",
     "format": "prettier . --write",
     "lint": "eslint . --ignore-path .gitignore"
   },
@@ -18,10 +18,10 @@
     "@types/validate-npm-package-name": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^4.23.0",
     "@typescript-eslint/parser": "^4.23.0",
-    "@vercel/ncc": "^0.28.5",
     "babel-eslint": "^10.1.0",
     "chalk": "^4.1.1",
     "enquirer": "^2.3.6",
+    "esbuild": "^0.11.22",
     "eslint": "^7.26.0",
     "eslint-config-react-app": "^6.0.0",
     "eslint-plugin-flowtype": "^5.7.2",
