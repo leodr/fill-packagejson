@@ -9,8 +9,7 @@
   ],
   "repository": "github:leodr/fill-packagejson",
   "license": "MIT",
-  "author": "Leo Driesch",
-  "main": "index.js",
+  "author": "Leo Driesch <dev@leodriesch.com>",
   "bin": {
     "fill-packagejson": "lib/cli.js"
   },
