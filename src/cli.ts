@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { prompt } from "enquirer";
 import equal from "fast-deep-equal";
 import * as fs from "fs";
 import ora from "ora";
@@ -6,6 +7,7 @@ import * as path from "path";
 import sortPackageJson from "sort-package-json";
 import type { JsonObject } from "type-fest";
 import { promisify } from "util";
+import { getLicenseText } from "./license-text";
 import { getAuthor } from "./questions/author";
 import { getDescription } from "./questions/description";
 import { getKeywords } from "./questions/keywords";
@@ -96,6 +98,31 @@ async function start() {
     await writeFileAsync(pkgJsonLocation, JSON.stringify(sortedPkg, null, 4));
 
     spinner.succeed("Saved your completed `package.json` file!");
+  }
+
+  const filesInCwd = fs.readdirSync(process.cwd());
+
+  const hasLicenseFile = filesInCwd.some((filename) =>
+    /^(license|license\.md)$/i.test(filename)
+  );
+
+  if (
+    !hasLicenseFile &&
+    typeof license === "string" &&
+    typeof author === "string"
+  ) {
+    const { wantsLicense }: { wantsLicense: boolean } = await prompt({
+      type: "confirm",
+      name: "wantsLicense",
+      message: "Do you want to add a license file?",
+    });
+
+    if (wantsLicense) {
+      await writeFileAsync(
+        path.resolve("LICENSE"),
+        getLicenseText(license, author.split(" <")[0]!)
+      );
+    }
   }
 
   if (!("main" in pkg) && !("bin" in pkg)) {
