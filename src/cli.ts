@@ -18,96 +18,94 @@ const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 
 async function start() {
-    const pkgJsonLocation = path.resolve("package-gen.json");
+  const pkgJsonLocation = path.resolve("package-gen.json");
 
-    let packageJson: JsonObject;
+  let packageJson: JsonObject;
 
-    if (fs.existsSync(pkgJsonLocation)) {
-        let pkgJsonString: string;
+  if (fs.existsSync(pkgJsonLocation)) {
+    let pkgJsonString: string;
 
-        try {
-            pkgJsonString = await readFileAsync(pkgJsonLocation, {
-                encoding: "utf-8",
-            });
-        } catch {
-            throw Error("Failed to read your `package.json` file.");
-        }
+    try {
+      pkgJsonString = await readFileAsync(pkgJsonLocation, {
+        encoding: "utf-8",
+      });
+    } catch {
+      throw Error("Failed to read your `package.json` file.");
+    }
 
-        try {
-            const json = JSON.parse(pkgJsonString);
+    try {
+      const json = JSON.parse(pkgJsonString);
 
-            if (typeof json !== "object") {
-                throw Error("`package.json` does not contain a JSON object.");
-            }
+      if (typeof json !== "object") {
+        throw Error("`package.json` does not contain a JSON object.");
+      }
 
-            packageJson = json;
-            console.log(
-                chalk.blueBright(
-                    "Loaded your package.json file. You will now be asked to fill in missing fields."
-                )
-            );
-        } catch {
-            throw Error("`package.json` does not contain a valid JSON object.");
-        }
-    } else {
-        packageJson = {};
-
+      packageJson = json;
+      console.log(
         chalk.blueBright(
-            "No package.json found in this directory, we will now create one based on your answers."
-        );
+          "Loaded your package.json file. You will now be asked to fill in missing fields."
+        )
+      );
+    } catch {
+      throw Error("`package.json` does not contain a valid JSON object.");
     }
+  } else {
+    packageJson = {};
 
-    const name = await getName(packageJson);
+    chalk.blueBright(
+      "No package.json found in this directory, we will now create one based on your answers."
+    );
+  }
 
-    const version = await getVersion(packageJson);
+  const name = await getName(packageJson);
 
-    const description = await getDescription(packageJson);
+  const version = await getVersion(packageJson);
 
-    const keywords = await getKeywords(packageJson);
+  const description = await getDescription(packageJson);
 
-    const {
-        bugs,
-        homepage,
-        repository,
-        username,
-    } = await getRepositoryInfo(packageJson, { name });
+  const keywords = await getKeywords(packageJson);
 
-    const license = await getLicense(packageJson);
+  const { bugs, homepage, repository, username } = await getRepositoryInfo(
+    packageJson,
+    { name }
+  );
 
-    const author = await getAuthor(packageJson, { username });
+  const license = await getLicense(packageJson);
 
-    const pkg: JsonObject = {
-        ...packageJson,
-        name,
-        version,
-        description,
-        keywords,
-        repository,
-        homepage,
-        bugs,
-        license,
-        author,
-    };
+  const author = await getAuthor(packageJson, { username });
 
-    if (equal(packageJson, pkg)) {
-        ora().succeed("Your `package.json` file is already complete!");
-    } else {
-        const sortedPkg = sortPackageJson(pkg);
+  const pkg: JsonObject = {
+    ...packageJson,
+    name,
+    version,
+    description,
+    keywords,
+    repository,
+    homepage,
+    bugs,
+    license,
+    author,
+  };
 
-        const spinner = ora("Saving `package.json`...").start();
+  if (equal(packageJson, pkg)) {
+    ora().succeed("Your `package.json` file is already complete!");
+  } else {
+    const sortedPkg = sortPackageJson(pkg);
 
-        await writeFileAsync(
-            path.resolve("package-gen.json"),
-            JSON.stringify(sortedPkg, null, 4)
-        );
+    const spinner = ora("Saving `package.json`...").start();
 
-        spinner.succeed("Saved your completed `package.json` file!");
-    }
+    await writeFileAsync(
+      path.resolve("package-gen.json"),
+      JSON.stringify(sortedPkg, null, 4)
+    );
 
-    // TODO: Hint if no main or bin
+    spinner.succeed("Saved your completed `package.json` file!");
+  }
+
+  // TODO: Hint if no main or bin
 }
 
 start().catch((e: Error) => {
-    console.error(chalk.redBright(e.message));
-    process.exit(1);
+  console.error(chalk.redBright(e.message));
+  process.exit(1);
 });
